@@ -64,7 +64,7 @@ def client():
 
 
     print("CLIENT STARTED", argv)
-    client_path = argv[-1]
+    client_path = argv[-2]
     patterns = ["*"] # Handle all the filetypes
     go_recursively = True
     ignore_patterns = None
