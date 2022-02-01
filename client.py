@@ -8,13 +8,8 @@ from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
 
-# FTP server using : https://www.techinfected.net/2017/07/create-simple-ftp-server-client-in-python.html
+# FTP server using : ftplib
 # Observer using: Watchdog
-# Requirements:
-# - Add folder with content
-# - Move folder from outside inside
-# - Move folder with content one level up
-
 
 def client():
     def initial_sync(client_path):
@@ -31,27 +26,28 @@ def client():
 
     def on_created(event):
         path = event.src_path[len(client_path)+1:]
+        # Check if we are dealing with a directory or file since creation is different
         if event.is_directory:
             ftp.mkd(path)
         else:
             ftp.storbinary('STOR '+path, open(event.src_path,'rb'))
-        print(f"hey, {path} has been created")
 
     def on_deleted(event):
         path = event.src_path[len(client_path) + 1:]
+        # Check if we are dealing with a directory or file since deletion is different
         if event.is_directory:
             ftp.rmd(path)
         else:
             ftp.delete(path)
 
     def on_modified(event):
+        # Modification is only done for files
+        # since modification of a folder is just the content changing which is already handled by other events
         path = event.src_path[len(client_path)+1:]
         if not event.is_directory:
             ftp.storbinary('STOR ' + path, open(event.src_path, 'rb'))
-            print(f"hey, {event.src_path} has been modified")
 
     def on_moved(event):
-        print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
         src_path = event.src_path[len(client_path) + 1:]
         dst_path = event.dest_path[len(client_path) + 1:]
         try:
@@ -59,6 +55,7 @@ def client():
         except:
             print("File already moved another time and no longer in this position")
             # Need to check if this is actually the case for file
+            # This should definitely be a more failsafe test!
             if not event.is_directory:
                 try:
                     ftp.size(dst_path) # Check if the file is actually moved
@@ -66,10 +63,8 @@ def client():
                     raise FileNotFoundError
 
 
-
-
     print("CLIENT STARTED", argv)
-    client_path = argv[-2]
+    client_path = argv[-1]
     patterns = ["*"] # Handle all the filetypes
     go_recursively = True
     ignore_patterns = None
@@ -80,6 +75,7 @@ def client():
     ftp.login('user', '12345') # Specify user and login
     ftp.cwd(".")
 
+    # Sync the server and client side to ensure content is the same
     initial_sync(client_path)
 
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
@@ -88,6 +84,7 @@ def client():
     my_event_handler.on_modified = on_modified
     my_event_handler.on_moved = on_moved
 
+    # Add observer to keep track of changes of the filestructure
     my_observer = Observer()
     my_observer.schedule(my_event_handler, client_path, recursive=go_recursively)
     my_observer.start()
@@ -95,7 +92,7 @@ def client():
     try:
         while True:
             time.sleep(1)
-    finally: # If process stopes
+    finally: # If process stops
         my_observer.stop()
         my_observer.join()
         print("Client Done", argv)
