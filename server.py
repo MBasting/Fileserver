@@ -1,3 +1,4 @@
+import os
 from sys import argv
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -7,6 +8,7 @@ from pyftpdlib.servers import FTPServer
 
 def server():
     server_path = argv[-1]
+    port = argv[-2]
 
     # Instantiate a dummy authorizer for managing 'virtual' users
     authorizer = DummyAuthorizer()
@@ -18,7 +20,7 @@ def server():
     handler = FTPHandler
     handler.authorizer = authorizer
 
-    server = FTPServer(("127.0.0.1", 1026), handler)
+    server = FTPServer(("127.0.0.1", int(port)), handler)
     try:
         server.serve_forever()
     finally:

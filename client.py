@@ -1,3 +1,4 @@
+import os
 import time
 from ftplib import FTP
 from os import walk
@@ -64,14 +65,15 @@ def client():
 
 
     print("CLIENT STARTED", argv)
-    client_path = argv[-2]
+    client_path = argv[-1]
+    port = argv[-2]
     patterns = ["*"] # Handle all the filetypes
     go_recursively = True
     ignore_patterns = None
     ignore_directories = False
     case_sensitive = True
     ftp = FTP('')
-    ftp.connect('localhost', 1026)
+    ftp.connect('localhost', int(port))
     ftp.login('user', '12345') # Specify user and login
     ftp.cwd(".")
 
