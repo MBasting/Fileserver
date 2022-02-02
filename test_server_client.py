@@ -1,25 +1,14 @@
 #
-# This is a an integration testing framework that can be used to check your
-# implementation against some of the typical scenarios. You don't have to
-# implement your solution in Python, but nevertheless you're encouraged to use
-# this framework to prove your solution works as expected. In order to do that,
-# your solution has to be comparible with this framework in two aspects:
-# 1. command-line arguments -- framework should be able to pass arguments to
-#   your implementation and run it
-# 2. client side file structure should mirror server side file structure
-# The framework contains a simple and inefficient implementation. It's given
-# for reference purposes only to demonstrate how to run the framework and that
-# it's possible to pass all the tests.
 #
 # Install dependencies:
-# pip3 install --user pytest
+# pip install pytest
+# pip install watchdog
+# pip install pyftpdlib
 #
 # How to run:
 # mkdir -p /tmp/dropbox/client
 # mkdir -p /tmp/dropbox/server
 
-
-# RUN own client and server version:
 # export CLIENT_CMD='python3 -c "import client as client; client.client()" {port} {path}'
 # export SERVER_CMD='python3 -c "import server as server; server.server()" {port} {path}'
 #
