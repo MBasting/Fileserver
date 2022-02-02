@@ -55,13 +55,6 @@ def client():
             ftp.rename(src_path, dst_path)
         except:
             print("File already moved another time and no longer in this position")
-            # Need to check if this is actually the case for file
-            # This should definitely be a more failsafe test!
-            if not event.is_directory:
-                try:
-                    ftp.size(dst_path) # Check if the file is actually moved
-                except:
-                    raise FileNotFoundError
 
 
     print("CLIENT STARTED", argv)
