@@ -9,9 +9,8 @@
 # mkdir -p /tmp/dropbox/client
 # mkdir -p /tmp/dropbox/server
 
-# export CLIENT_CMD='python3 -c "import client as client; client.client()" {port} {path}'
-# export SERVER_CMD='python3 -c "import server as server; server.server()" {port} {path}'
-#
+# Start client by running: python3 -c "import client as client; client.client()" {port} {path}
+# Start server by running: python3 -c "import server as server; server.server()" {port} {path}
 
 # Verbose, with stdout, filter by test name
 # pytest -vv -s . -k 'test_some_name'
@@ -20,6 +19,7 @@
 # Verbose, with stdout, show summary in the end
 # pytest -s -vv -q -rapP
 #
+import os
 from contextlib import closing
 from hashlib import md5
 from os import environ, getpgid, killpg, mkdir, remove, setsid, walk, listdir, unlink, rename, rmdir
@@ -32,6 +32,8 @@ from sys import stderr, stdout
 from time import sleep
 from unittest import TestCase
 
+from client import client
+from server import server
 
 ASSERT_TIMEOUT = 20.0
 ASSERT_STEP = 1.0
@@ -149,8 +151,8 @@ class TestClassObserverSync(TestCase):
         reset_path(self.spath)
         reset_path(self.cpath)
         port = find_free_port()
-        self.server_cmd = environ["SERVER_CMD"].format(port=port, path=self.spath)
-        self.client_cmd = environ["CLIENT_CMD"].format(port=port, path=self.cpath)
+        self.server_cmd = f'python3 -c "import server as server; server.server()" {port} {self.spath}'
+        self.client_cmd = f'python3 -c "import client as client; client.client()" {port} {self.cpath}'
         self.server_process = Process(self.server_cmd)
         sleep(1.0)
         self.client_process = Process(self.client_cmd)
@@ -165,19 +167,19 @@ class TestClassObserverSync(TestCase):
     def test_move_folder_outside(self):
         mkdir(join(self.cpath, "newemptydir"))
         assert_paths_in_sync(self.cpath, self.spath)
-        move(join(self.cpath, "newemptydir"), "/home/markb/Documents/Program_repos/Fileserver/test")
+        move(join(self.cpath, "newemptydir"), join(os.getcwd(), "test"))
         assert_paths_in_sync(self.cpath, self.spath)
-        rmdir("/home/markb/Documents/Program_repos/Fileserver/test")
+        rmdir(join(os.getcwd(), "test"))
 
     def test_move_file_outside(self):
         create(join(self.cpath, "newfile.txt"), "contents")
         assert_paths_in_sync(self.cpath, self.spath)
-        move(join(self.cpath, "newfile.txt"), "/home/markb/Documents/Program_repos/Fileserver/test.txt")
+        move(join(self.cpath, "newfile.txt"), join(os.getcwd(), "test.txt"))
         assert_paths_in_sync(self.cpath, self.spath)
-        remove("/home/markb/Documents/Program_repos/Fileserver/test.txt")
+        remove(join(os.getcwd(), "test.txt"))
 
     def test_move_folder_outside_inside_with_tree(self):
-        path = "/home/markb/Documents/Program_repos/Fileserver/test"
+        path = join(os.getcwd(), "test")
         mkdir(path)
         create(join(path, "newfile.txt"), "content")
         assert_paths_in_sync(self.cpath, self.spath)
@@ -323,8 +325,8 @@ class TestInitialSync(TestCase):
         reset_path(self.spath)
         reset_path(self.cpath)
         port = find_free_port()
-        self.server_cmd = environ["SERVER_CMD"].format(port=port, path=self.spath)
-        self.client_cmd = environ["CLIENT_CMD"].format(port=port, path=self.cpath)
+        self.server_cmd = f'python3 -c "import server as server; server.server()" {port} {self.spath}'
+        self.client_cmd = f'python3 -c "import client as client; client.client()" {port} {self.cpath}'
         print(self.server_cmd)
         print(self.client_cmd)
 

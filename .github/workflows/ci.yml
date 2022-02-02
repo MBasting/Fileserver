@@ -21,8 +21,6 @@ jobs:
           python-version: 3.6
       - name: Install dependencies
         run: |
-          export SERVER_CMD='python3 -c "import server as server; server.server()" {port} {path}'
-          export CLIENT_CMD='python3 -c "import client as client; client.client()" {port} {path}'
           mkdir -p /tmp/dropbox/client
           mkdir -p /tmp/dropbox/server
           python -m pip install --upgrade pip
